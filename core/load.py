@@ -58,7 +58,7 @@ def load_datasets(training, test, y_name):
     
     X1, X2 = scale(X1).tolist(), scale(X2).tolist()
     
-    if settings.VERBOSE==-1:
+    if settings.VERBOSE == 1:
         print_data(X1, X2, Y1, Y2, O1, O2, y_name)
     
     return X1, X2, Y1, Y2, O1, O2, V

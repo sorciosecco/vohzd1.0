@@ -63,39 +63,8 @@ def calculate_pls_metrics(y_train_exp, y_train_pred, y_test_exp, y_test_pred, lc
                 ocsv.write(';'.join([ str(l) for l in r ])+'\n')
             ocsv.close()
 
-def calculate_micro_scores(Y1_exp, Y1_pred, Y1_prob, Y2_exp, Y2_pred, Y2_prob, O1, O2, pc):
-    def get_uncertain(Y, threshold):
-        Ye, Yp, Nu = [], [], []
-        UNC=0
-        for y in range(len(Y[0])):
-            if max(Y[2][y]) > threshold:
-                Ye.append(Y[0][y])
-                Yp.append(Y[1][y])
-            else:
-                UNC+=1
-                Nu.append(Y[3][y])
-        return Ye, Yp, UNC, Nu
-    
-    message="\nSet\tTP\tFN\tTN\tFP\tUNC\tACC\tSE\tSP\tCoverage"
-    tot_unc=0
-    names_unc=[]
-    for i, Y in enumerate([(Y1_exp, Y1_pred, Y1_prob, O1), (Y2_exp, Y2_pred, Y2_prob, O2)]):
-        Ye, Yp, UNC, Nu = get_uncertain(Y, threshold=pc)
-        TN, FP, FN, TP = confusion_matrix(Ye, Yp).ravel()
-        ACC = round(accuracy_score(Ye, Yp),2)
-        SE, SP = round(recall_score(Ye, Yp),2), round(TN/(TN+FP),2)
-        COV = round((len(Y[0])-UNC)*100/len(Y[0]))
-        if i==0:
-            message+="\t".join([ str(s) for s in ["\nTrain",TP,FN,TN,FP,UNC,ACC,SE,SP,COV] ])
-        else:
-            message+="\t".join([ str(s) for s in ["\nTest",TP,FN,TN,FP,UNC,ACC,SE,SP,COV] ])
-        tot_unc+=UNC
-        names_unc.extend(Nu)
-    
-    print(message)
-    return tot_unc, names_unc
-
 def calculate_class_scores(Y1_exp, Y1_pred, Y1_prob, Y2_exp, Y2_pred, Y2_prob, O1, O2, mc, pc):
+    
     def get_uncertain(Y, threshold):
         Ye, Yp, Yu = [], [], []
         for y in range(len(Y[0])):
@@ -114,12 +83,9 @@ def calculate_class_scores(Y1_exp, Y1_pred, Y1_prob, Y2_exp, Y2_pred, Y2_prob, O
         for i, Y in enumerate([(Y1_exp, Y1_pred, Y1_prob, O1), (Y2_exp, Y2_pred, Y2_prob, O2)]):
             classes, occurrences = np.unique(Y[0], return_counts=True)[0].tolist(), np.unique(Y[0], return_counts=True)[1].tolist()
             
-            #cutoff=1/float(len(classes))
             Ye, Yp, Yu = get_uncertain(Y, threshold=t)
             
             EE = sum([1 for x in range(len(Ye)) if Yp[x]!=Ye[x]]) / len(Ye)
-            print(round(EE,2))
-            
             if i==1:
             #if i!=-1:
                 message="\nCorrect test predictions -> "+str(round(100-EE*100))+"%\n\nBDDCS\tPRED_1\tPRED_2\tPRED_3\tPRED_4\tUNC\tCORR_%"

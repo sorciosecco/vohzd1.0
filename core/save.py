@@ -1,4 +1,6 @@
 
+import os
+import pickle
 import numpy as np
 
 def save_pls_predictions(y_train_exp, y_test_exp, y_train_pred, y_test_pred, ob_train, ob_test, lt, ht):
@@ -65,3 +67,10 @@ def save_multi_predictions(name, Y1_exp, Y1_pred, Y1_prob, Y2_exp, Y2_pred, Y2_p
             else:
                 ocsv.write("%s;TEST;%s;%s;%s;%s\n" % line)
     ocsv.close()
+
+def save_model(m, mt):
+    model_filename = os.path.join(os.getcwd(), mt+'.model')
+    picklefile = open(model_filename, 'wb')
+    pickle.dump(m, picklefile)
+    picklefile.close()
+    

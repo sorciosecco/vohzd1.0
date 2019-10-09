@@ -9,7 +9,7 @@ from core.balance import balance_sets
 from core.buildr import build_regression_model
 
 description_message="Software to perform machine learning on a XY matrix"
-usage_message='''%(prog)s  [<optional arguments>] COMMAND [<specific_options>] <input File> <output File>'''
+usage_message='''%(prog)s [<optional arguments>] COMMAND [<specific_options>]'''
 epilog_message='''COMMANDS are:
     SUBSET  For creating a training and a test set
     BUILDC  For running a classification study
@@ -22,10 +22,9 @@ if __name__=="__main__":
     parser.add_argument("-f", "--fit", type=str, help="TRAINING SET file with descriptors and activity (; separated)", required=True)
     parser.add_argument("-p", "--predict", type=str, help="TEST SET file with descriptors and activity (; separated)")
     parser.add_argument("-a", "--activity", type=str, help="Y name", required=True)
-    parser.add_argument("-m", "--model", type=str, help="available models: AB, ETC, GB, kNN, LDA, MLP, PLS, RF, SVM")
-    parser.add_argument("-u", "--cpus", type=int, help="cpus used (default is all)")
+    parser.add_argument("-m", "--model", type=str, default="RF", help="available models: AB, ETC, GB, kNN, LDA, MLP, PLS, RF, SVM")
     parser.add_argument("-v", "--verbose", type=int, default=0, help="increase verbosity")
-    
+    parser.add_argument("-s", "--seed", type=int, default=666, help="set random seed")
     subparsers = parser.add_subparsers()
     
     parser_SUBSET = subparsers.add_parser("SUBSET")
@@ -42,11 +41,9 @@ if __name__=="__main__":
     parser_BALANC.set_defaults(func=balance_sets)
     
     parser_BUILDC=subparsers.add_parser("BUILDC")
-    parser_BUILDC.add_argument("-se", "--seed", type=int, default=666, help="set random seed")
     parser_BUILDC.add_argument("-pc", "--probacutoff", type=float, default=None, help="generate predictions only for objects having a prediction probability above this cutoff")
     parser_BUILDC.add_argument("-np", "--npara", action="store_true", help="use non-default parameters for model training")
     parser_BUILDC.add_argument("-mc", "--multiclass", action="store_true", help="to model more than two classes")
-    parser_BUILDC.add_argument("-ms", "--microspec", action="store_true", help="to remodel uncertain predictions with possible micro-species (it requires a proba. cutoff > 0.5)")
     parser_BUILDC.add_argument("-gs", "--gridsearch", action="store_true", help="use grid search to detect optimal parameters")
     parser_BUILDC.add_argument("-sm", "--savemodel", action="store_true", help="save model")
     parser_BUILDC.add_argument("-sp", "--savepred", action="store_true", help="save predictions on csv file")
@@ -60,12 +57,9 @@ if __name__=="__main__":
     parser_BUILDRC.set_defaults(func=build_class_regression_model)
     
     parser_BUILDR=subparsers.add_parser("BUILDR")
-    parser_BUILDR.add_argument("-se", "--seed", type=int, help="set random seed")
     parser_BUILDR.add_argument("-lv", "--latent", type=int, help="[for PLS only] use a fixed number of latent variables (default is 10)")
     parser_BUILDR.add_argument("-pc", "--probacutoff", type=float, default=0.5, help="[for ML only] generate predictions only for objects having a prediction probability above this cutoff")
     parser_BUILDR.add_argument("-np", "--npara", action="store_true", help="[for ML only] use non-default parameters for model training")
-    #parser_BUILDR.add_argument("-mc", "--multiclass", action="store_true", help="to model more than two classes")
-    #parser_BUILDR.add_argument("-ms", "--microspec", action="store_true", help="to remodel uncertain predictions with possible micro-species (it requires a proba. cutoff > 0.5)")
     parser_BUILDR.add_argument("-gs", "--gridsearch", action="store_true", help="[for ML only] use grid search to detect optimal parameters")
     #parser_BUILDR.add_argument("-sm", "--savemodel", action="store_true", help="save model")
     parser_BUILDR.add_argument("-sp", "--savepred", action="store_true", help="save predictions on csv file")
@@ -79,8 +73,7 @@ if __name__=="__main__":
     settings.PREDICT=args.predict
     settings.VERBOSE=args.verbose
     settings.MODEL=args.model
-    settings.CPUS=args.cpus
-    
+    settings.SEED=args.seed
     # This launches the specific function, according to the specified command
     args.func(args)
     

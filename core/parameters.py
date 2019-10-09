@@ -1,22 +1,22 @@
-##### (RF ETC AB GB) parameters
-n_estimators=300
+##### (RF ETC AB GB)
+n_estimators=100
 
 ## RF ETC GB
-#max_features='sqrt'
+max_features='sqrt'
 #max_features='log2'
-max_features=None
+#max_features=None
 
 max_depth=None
 max_leaf_nodes=None
 
 ## RF ETC SVM
-class_weight=None
+#class_weight=None
 #class_weight='balanced'
-#class_weight='balanced_subsample'
+class_weight='balanced_subsample'
 
 ## RF ETC
-#criterion='gini'
-criterion='entropy'
+criterion='gini'
+#criterion='entropy'
 
 ## AB
 algorithm='SAMME.R'
@@ -31,9 +31,9 @@ solver='lsqr'
 shrinkage=0.95
 
 ## SVM
-C=9
-degree=1
-gamma=0.005
+C=1
+degree=3
+gamma='auto'
 kernel='rbf'
 
 ## MLP

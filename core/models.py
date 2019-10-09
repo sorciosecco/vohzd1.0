@@ -1,20 +1,14 @@
 
-import os
-import pickle
-
 from core import settings
 from core import parameters
+from core.save import save_model
 
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.ensemble import GradientBoostingClassifier
-from sklearn.ensemble import AdaBoostClassifier
-from sklearn.ensemble import ExtraTreesClassifier
+from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier, AdaBoostClassifier, ExtraTreesClassifier
 from sklearn.svm import SVC
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.neural_network import MLPClassifier
-from sklearn.multiclass import OneVsRestClassifier
-#from sklearn.multiclass import OneVsOneClassifier
+from sklearn.multiclass import OneVsRestClassifier, OneVsOneClassifier
 
 def algorithm_setup(model_type, nondef_params):
     
@@ -22,7 +16,10 @@ def algorithm_setup(model_type, nondef_params):
     if model_type=="AB":
         from sklearn.tree import DecisionTreeClassifier
         if nondef_params:
-            model=AdaBoostClassifier(base_estimator=DecisionTreeClassifier(max_depth=1), n_estimators=parameters.n_estimators, algorithm=parameters.algorithm, random_state=settings.SEED)
+            model=AdaBoostClassifier(base_estimator=DecisionTreeClassifier(max_depth=1)
+                                     , n_estimators=parameters.n_estimators
+                                     , algorithm=parameters.algorithm
+                                     , random_state=settings.SEED)
         else:
             model=AdaBoostClassifier(base_estimator=DecisionTreeClassifier(max_depth=1)
                                      , n_estimators=100
@@ -33,7 +30,13 @@ def algorithm_setup(model_type, nondef_params):
     # Extra Trees Classifier (ETC)
     if model_type=="ETC":
         if nondef_params:
-            model=ExtraTreesClassifier(n_estimators=parameters.n_estimators, class_weight=parameters.class_weight, criterion=parameters.criterion, max_depth=parameters.max_depth, max_features=parameters.max_features, max_leaf_nodes=parameters.max_leaf_nodes, random_state=settings.SEED)
+            model=ExtraTreesClassifier(n_estimators=parameters.n_estimators
+                                       , class_weight=parameters.class_weight
+                                       , criterion=parameters.criterion
+                                       , max_depth=parameters.max_depth
+                                       , max_features=parameters.max_features
+                                       , max_leaf_nodes=parameters.max_leaf_nodes
+                                       , random_state=settings.SEED)
         else:
             model=ExtraTreesClassifier(random_state=settings.SEED
                                        , n_estimators=100
@@ -49,14 +52,17 @@ def algorithm_setup(model_type, nondef_params):
                                        , min_impurity_decrease=0.0
                                        , min_impurity_split=None
                                        , oob_score=False
-                                       , n_jobs=-1
                                        , warm_start=False
                                        )
     
     # Gradient Boosting (GB)
     if model_type=="GB":
         if nondef_params:
-            model=GradientBoostingClassifier(n_estimators=parameters.n_estimators, max_depth=parameters.max_depth, max_features=parameters.max_features, max_leaf_nodes=parameters.max_leaf_nodes, random_state=settings.SEED)
+            model=GradientBoostingClassifier(n_estimators=parameters.n_estimators
+                                             , max_depth=parameters.max_depth
+                                             , max_features=parameters.max_features
+                                             , max_leaf_nodes=parameters.max_leaf_nodes
+                                             , random_state=settings.SEED)
         else:
             model=GradientBoostingClassifier(random_state=settings.SEED
                                              , n_estimators=100
@@ -89,15 +95,17 @@ def algorithm_setup(model_type, nondef_params):
                                    , p=2
                                    , metric='minkowski'
                                    , metric_params=None
-                                   , n_jobs=1)
+                                   )
     
     # Linear Discriminant Analysis (LDA)
     if model_type=="LDA":
         if nondef_params:
-            model=LinearDiscriminantAnalysis(solver=parameters.solver, shrinkage=parameters.shrinkage)
+            model=LinearDiscriminantAnalysis(solver=parameters.solver
+                                             , shrinkage=parameters.shrinkage
+                                             )
         else:
-            model=LinearDiscriminantAnalysis(solver='svd'
-                                             , shrinkage=None
+            model=LinearDiscriminantAnalysis(solver='lsqr'
+                                             , shrinkage='auto'
                                              , priors=None
                                              , n_components=None
                                              , store_covariance=False
@@ -134,7 +142,13 @@ def algorithm_setup(model_type, nondef_params):
     # Random Forest (RF)
     if model_type=="RF":
         if nondef_params:
-            model=RandomForestClassifier(n_estimators=parameters.n_estimators, class_weight=parameters.class_weight, criterion=parameters.criterion, max_depth=parameters.max_depth, max_features=parameters.max_features, max_leaf_nodes=parameters.max_leaf_nodes, random_state=settings.SEED)
+            model=RandomForestClassifier(n_estimators=parameters.n_estimators
+                                         , class_weight=parameters.class_weight
+                                         , criterion=parameters.criterion
+                                         , max_depth=parameters.max_depth
+                                         , max_features=parameters.max_features
+                                         , max_leaf_nodes=parameters.max_leaf_nodes
+                                         , random_state=settings.SEED)
         else:
             model=RandomForestClassifier(random_state=settings.SEED
                                          , n_estimators=100
@@ -150,14 +164,19 @@ def algorithm_setup(model_type, nondef_params):
                                          , min_impurity_split=None
                                          , bootstrap=True
                                          , oob_score=False
-                                         , n_jobs=-1
                                          , warm_start=False
                                          )
     
     # Support Vector Machines (SVM)
     if model_type=="SVM":
         if nondef_params:
-            model=SVC(probability=True, C=parameters.C, degree=parameters.degree, gamma=parameters.gamma, kernel=parameters.kernel, random_state=settings.SEED, class_weight=parameters.class_weight)
+            model=SVC(probability=True
+                      , C=parameters.C
+                      , degree=parameters.degree
+                      , gamma=parameters.gamma
+                      , kernel=parameters.kernel
+                      , class_weight=parameters.class_weight
+                      , random_state=settings.SEED)
         else:
             model=SVC(random_state=settings.SEED
                 , C=1.0
@@ -170,17 +189,10 @@ def algorithm_setup(model_type, nondef_params):
                 , tol=0.001
                 , cache_size=200
                 , class_weight=None
-                , max_iter=-1
                 , decision_function_shape='ovr'
                 )
     
     return model
-
-def save_model(model, model_type):
-    model_filename = os.path.join(os.getcwd(), model_type+'.model')
-    picklefile = open(model_filename, 'wb')
-    pickle.dump(model, picklefile)
-    picklefile.close()
 
 def define_model_for_optimization(mt, ndp, mc):
     model=algorithm_setup(model_type=mt, nondef_params=ndp)
@@ -203,6 +215,6 @@ def modelling(X_train, X_test, Y_train, model_type, nondef_params, sm, mc):
     Y1_pred, Y2_pred, Y1_prob, Y2_prob = model.predict(X_train).tolist(), model.predict(X_test).tolist(), model.predict_proba(X_train).tolist(), model.predict_proba(X_test).tolist()
     
     if sm:
-        save_model(model, model_type)
+        save_model(m=model, mt=model_type)
     
     return Y1_pred, Y2_pred, Y1_prob, Y2_prob
