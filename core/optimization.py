@@ -1,7 +1,5 @@
 
-#NB: to implement for multiclass with single score!!!!!
-
-import itertools
+import os, shutil, itertools, tempfile
 import numpy as np
 import multiprocessing as mp
 from sklearn.model_selection import KFold
@@ -39,6 +37,7 @@ def cross_validation(x, y, cv, model):
         return [np.mean(SE), np.mean(SP), np.mean(MCC)]
 
 def compute_model(model):
+    
     X, Y, m = model[0], model[1], model[-1]
     try:
         m.fit(X, Y)
@@ -49,77 +48,98 @@ def compute_model(model):
     
     q.put(1)
     size=q.qsize()
-    message=""
-    if settings.VERBOSE==0:
-        message += '['+str(round(size*100/settings.N,2))+' %] of models completed'
-    elif settings.VERBOSE==1:
-        message += '[%s %] of models completed\n\tSE = %s\n\tSP = %s\n\tMCC = %s' % (round(size*100/settings.N,2), round(scores[0],3), round(scores[1],3), round(scores[-1],3))
-    print(message)
+    print('['+str(round(size*100/settings.N,3))+' %] of models completed')
     
     if settings.MULTICLASS:
         params = { k.split('__')[-1]: m.get_params()[k] for k in list(m.get_params().keys()) }
     else:
         params = m.get_params()
     
-    return params, scores
+    ocsv=open(os.path.join(settings.workdir, str(size))+".csv", "w")
+    ocsv.write(';'.join([str(size)] + [str(params[k]) for k in sorted(list(params.keys())) if k in settings.NAMES] + [str(s) for s in scores]) + '\n')
+    ocsv.close()
 
 def gridsearchcv(X, Y, grid):
-    if settings.CPUS == None:
-        ncpus=mp.cpu_count()
-    else:
-        ncpus=args.cpus
+    origdir=os.getcwd()
+    workdir=tempfile.mkdtemp(prefix='TMP')
+    os.chdir(workdir)
     
     names, values = list(grid.keys()), list(itertools.product(*grid.values()))
     settings.N=len(values)
+    settings.NAMES=names
+    settings.workdir=workdir
     
     models=[]
+    counter=0
     for v in values:
         combo={names[i]: v[i] for i in range(len(v))}
         for p in list(combo.keys()):
-            if p=='n_estimators':
-                parameters.n_estimators = combo[p]
-            elif p=='criterion':
-                parameters.criterion = combo[p]
-            elif p=='max_features':
-                parameters.max_features = combo[p]
-            elif p=='max_depth':
-                parameters.max_depth = combo[p]
-            elif p=='max_leaf_nodes':
-                parameters.max_leaf_nodes = combo[p]
-            elif p=='class_weight':
-                parameters.class_weight = combo[p]
-            elif p=='bootstrap':
-                parameters.bootstrap = combo[p]
-            elif p=='algorithm':
-                parameters.algorithm = combo[p]
-            elif p=='shrinkage':
-                parameters.shrinkage = combo[p]
-            elif p=='solver':
-                parameters.solver = combo[p]
-            elif p=='C':
-                parameters.C = combo[p]
-            elif p=='kernel':
-                parameters.kernel = combo[p]
-            elif p=='gamma':
-                parameters.gamma = combo[p]
-            elif p=='degree':
-                parameters.degree = combo[p]
-        model = define_model_for_optimization(mt=settings.MODEL, ndp=True, mc=settings.MULTICLASS)
-        models.append((X, Y, model))
+            if p=='n_estimators': parameters.n_estimators = combo[p]
+            elif p=='criterion_rf': parameters.criterion_rf = combo[p]
+            elif p=='criterion_gb': parameters.criterion_gb = combo[p]
+            elif p=='max_features': parameters.max_features = combo[p]
+            elif p=='max_depth': parameters.max_depth = combo[p]
+            elif p=='max_leaf_nodes': parameters.max_leaf_nodes = combo[p]
+            elif p=='class_weight': parameters.class_weight = combo[p]
+            elif p=='loss': parameters.loss = combo[p]
+            elif p=='algorithm': parameters.algorithm = combo[p]
+            elif p=='shrinkage': parameters.shrinkage = combo[p]
+            elif p=='solver': parameters.solver = combo[p]
+            elif p=='C': parameters.C = combo[p]
+            elif p=='kernel': parameters.kernel = combo[p]
+            elif p=='gamma': parameters.gamma = combo[p]
+            elif p=='degree': parameters.degree = combo[p]
+        
+        if settings.MODEL in ["RF", "ETC", "GB"]:
+            if parameters.max_leaf_nodes != None:
+                if parameters.max_leaf_nodes != counter:
+                    model = define_model_for_optimization(mt=settings.MODEL, ndp=True, mc=settings.MULTICLASS)
+                    models.append((X, Y, model))
+                    couter = parameters.max_leaf_nodes
+            else:
+                model = define_model_for_optimization(mt=settings.MODEL, ndp=True, mc=settings.MULTICLASS)
+                models.append((X, Y, model))
+        
+        elif settings.MODEL == "LDA":
+            if parameters.solver == "svd":
+                if parameters.shrinkage == None:
+                    model = define_model_for_optimization(mt=settings.MODEL, ndp=True, mc=settings.MULTICLASS)
+                    models.append((X, Y, model))
+            else:
+                model = define_model_for_optimization(mt=settings.MODEL, ndp=True, mc=settings.MULTICLASS)
+                models.append((X, Y, model))
+        
+        elif settings.MODEL == "SVM":
+            if parameters.kernel != "poly":
+                if parameters.degree == 3:
+                    model = define_model_for_optimization(mt=settings.MODEL, ndp=True, mc=settings.MULTICLASS)
+                    models.append((X, Y, model))
+            else:
+                model = define_model_for_optimization(mt=settings.MODEL, ndp=True, mc=settings.MULTICLASS)
+                models.append((X, Y, model))
+            if parameters.kernel == "linear":
+                if parameters.gamma == 'auto':
+                    model = define_model_for_optimization(mt=settings.MODEL, ndp=True, mc=settings.MULTICLASS)
+                    models.append((X, Y, model))
+            else:
+                model = define_model_for_optimization(mt=settings.MODEL, ndp=True, mc=settings.MULTICLASS)
+                models.append((X, Y, model))
+        else:
+            model = define_model_for_optimization(mt=settings.MODEL, ndp=True, mc=settings.MULTICLASS)
+            models.append((X, Y, model))
     
-    pool=mp.Pool(ncpus)
-    results = pool.map_async(compute_model, models)
+    pool=mp.Pool(mp.cpu_count())
+    pool.map_async(compute_model, models)
     pool.close()
     pool.join()
-    #results=[]
-    #for i, m in enumerate(models):
-        #r1, r2 = compute_model(m)
-        #results.append([r1,r2])
     
+    os.chdir(origdir)
     outfile=open("opt_results_%s.csv" % settings.MODEL, "w")
-    if settings.MULTICLASS: outfile.write(';'.join(['model_id'] + sorted(names) + ['EE\n']))
+    if settings.MULTICLASS: outfile.write(';'.join(['model_id'] + sorted(names) + ['EE (5-fold cv)\n']))
     else: outfile.write(';'.join(['model_id'] + sorted(names) + ['SE','SP','MCC\n']))
-    #for i, r in enumerate(results):
-    for i, r in enumerate(results.get()):
-        outfile.write(';'.join([str(i)] + [str(r[0][k]) for k in sorted(list(r[0].keys())) if k in names] + [str(s) for s in r[-1]]) + '\n')
+    for f in os.listdir(workdir):
+        line=open(os.path.join(workdir,f)).readline()
+        outfile.write(line)
     outfile.close()
+    
+    shutil.rmtree(workdir)

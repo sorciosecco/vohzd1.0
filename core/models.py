@@ -32,7 +32,7 @@ def algorithm_setup(model_type, nondef_params):
         if nondef_params:
             model=ExtraTreesClassifier(n_estimators=parameters.n_estimators
                                        , class_weight=parameters.class_weight
-                                       , criterion=parameters.criterion
+                                       , criterion=parameters.criterion_rf
                                        , max_depth=parameters.max_depth
                                        , max_features=parameters.max_features
                                        , max_leaf_nodes=parameters.max_leaf_nodes
@@ -62,6 +62,8 @@ def algorithm_setup(model_type, nondef_params):
                                              , max_depth=parameters.max_depth
                                              , max_features=parameters.max_features
                                              , max_leaf_nodes=parameters.max_leaf_nodes
+                                             , loss=parameters.loss
+                                             , criterion=parameters.criterion_gb
                                              , random_state=settings.SEED)
         else:
             model=GradientBoostingClassifier(random_state=settings.SEED
@@ -144,7 +146,7 @@ def algorithm_setup(model_type, nondef_params):
         if nondef_params:
             model=RandomForestClassifier(n_estimators=parameters.n_estimators
                                          , class_weight=parameters.class_weight
-                                         , criterion=parameters.criterion
+                                         , criterion=parameters.criterion_rf
                                          , max_depth=parameters.max_depth
                                          , max_features=parameters.max_features
                                          , max_leaf_nodes=parameters.max_leaf_nodes

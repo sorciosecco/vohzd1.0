@@ -29,3 +29,5 @@ STRATEGY=False
 VERBOSE=0
 
 N=0
+NAMES=None
+workdir=''
