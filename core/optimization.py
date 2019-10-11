@@ -32,7 +32,7 @@ def cross_validation(x, y, cv, model):
             SP.append(sp)
             MCC.append(mcc)
     if settings.MULTICLASS:
-        return [np.mean(scores)]
+        return [round(np.mean(scores),2)]
     else:
         return [np.mean(SE), np.mean(SP), np.mean(MCC)]
 
@@ -49,6 +49,7 @@ def compute_model(model):
     q.put(1)
     size=q.qsize()
     print('['+str(round(size*100/settings.N,3))+' %] of models completed')
+    #print(m.get_params())
     
     if settings.MULTICLASS:
         params = { k.split('__')[-1]: m.get_params()[k] for k in list(m.get_params().keys()) }
@@ -66,7 +67,7 @@ def gridsearchcv(X, Y, grid):
     
     names, values = list(grid.keys()), list(itertools.product(*grid.values()))
     settings.N=len(values)
-    settings.NAMES=names
+    settings.NAMES=[]
     settings.workdir=workdir
     
     models=[]
@@ -82,13 +83,24 @@ def gridsearchcv(X, Y, grid):
             elif p=='max_leaf_nodes': parameters.max_leaf_nodes = combo[p]
             elif p=='class_weight': parameters.class_weight = combo[p]
             elif p=='loss': parameters.loss = combo[p]
-            elif p=='algorithm': parameters.algorithm = combo[p]
+            elif p=='algorithm_ab': parameters.algorithm_ab = combo[p]
+            #elif p=='algorithm_knn': parameters.algorithm_knn = combo[p]
             elif p=='shrinkage': parameters.shrinkage = combo[p]
             elif p=='solver': parameters.solver = combo[p]
             elif p=='C': parameters.C = combo[p]
             elif p=='kernel': parameters.kernel = combo[p]
             elif p=='gamma': parameters.gamma = combo[p]
             elif p=='degree': parameters.degree = combo[p]
+            elif p=='n_neighbors': parameters.n_neighbors = combo[p]
+            elif p=='weights': parameters.weights = combo[p]
+            #elif p=='leaf_size': parameters.leaf_size = combo[p]
+            elif p=='p': parameters.p = combo[p]
+            
+            #if p.startswith("criterion") or p.startswith("algorithm"):
+            if p.startswith("criterion"):
+                settings.NAMES.append(p.split('_')[0])
+            else:
+                settings.NAMES.append(p)
         
         if settings.MODEL in ["RF", "ETC", "GB"]:
             if parameters.max_leaf_nodes != None:

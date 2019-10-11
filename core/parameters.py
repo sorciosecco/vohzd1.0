@@ -115,7 +115,7 @@ criterion_rf='gini'
 
 ### If SAMME.R then use the SAMME.R real boosting algorithm. base_estimator must support calculation of class probabilities. If SAMME then use the SAMME discrete boosting algorithm. The SAMME.R algorithm typically converges faster than SAMME, achieving a lower test error with fewer boosting iterations.
 
-algorithm='SAMME.R'
+algorithm_ab='SAMME.R'
 #algorithm='SAMME'
 
 ##### (GB)
@@ -142,9 +142,9 @@ criterion_gb='friedman_mse'
 #   "lsqr": Least squares solution, can be combined with shrinkage.
 #   "eigen": Eigenvalue decomposition, can be combined with shrinkage.
 
-solver='svd'
+#solver='svd'
 solver='lsqr'
-solver='eigen'
+#solver='eigen'
 
 ##### (LDA)
 
@@ -183,27 +183,45 @@ kernel='linear'
 #kernel='poly'
 #kernel='sigmoid'
 
+##### (kNN, rNN)
+
+### Number of neighbors to use by default for kneighbors queries.
+
+n_neighbors=5
+
+### Radius to use by default for kneighbors queries.
+
+radius=1.0
+
+### Weight function used in prediction. Possible values:
+#   "uniform" : uniform weights. All points in each neighborhood are weighted equally.
+#   "distance" : weight points by the inverse of their distance. in this case, closer neighbors of a query point will have a greater influence than neighbors which are further away.
+#   [callable] : a user-defined function which accepts an array of distances, and returns an array of the same shape containing the weights.
+
+weights='uniform'
+#weights='distance'
+
+### Algorithm used to compute the nearest neighbors:
+#   "ball_tree" will use BallTree
+#   "kd_tree" will use KDTree
+#   "brute" will use a brute-force search.
+#   "auto" will attempt to decide the most appropriate algorithm based on the values passed to fit method.
+
+#algorithm_knn='auto'
+
+### Leaf size passed to BallTree or KDTree. This can affect the speed of the construction and query, as well as the memory required to store the tree. The optimal value depends on the nature of the problem.
+
+#leaf_size=30
+
+### Power parameter for the Minkowski metric. When p = 1, this is equivalent to using manhattan_distance (l1), and euclidean_distance (l2) for p = 2. For arbitrary p, minkowski_distance (l_p) is used.
+
+#p=1
+p=2
+
+### The distance metric to use for the tree. The default metric is minkowski, and with p=2 is equivalent to the standard Euclidean metric. See the documentation of the DistanceMetric class for a list of available metrics.
+
+#metric='minkowski'
+
 ##### MLP
 max_iter=500
-#hidden_layer_sizes=(1000)
 hidden_layer_sizes=(200,50)
-#hidden_layer_sizes=(200,150,100)
-#hidden_layer_sizes=(200,150,100,50)
-
-#activation='logistic'
-#alpha=0.0001
-#batch_size='auto'
-#learning_rate='constant'
-#learning_rate_init=0.001
-#power_t=0.5
-#shuffle=True
-#tol=0.0001
-#warm_start=False
-#momentum=0.9
-#nesterovs_momentum=True
-#early_stopping=False
-#validation_fraction=0.1
-#beta_1=0.9
-#beta_2=0.999
-#epsilon=1e-08
-#n_iter_no_change=10

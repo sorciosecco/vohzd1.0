@@ -1,4 +1,6 @@
 
+##### NB: rNN has no probabilities!!!
+
 from core import settings
 from core import parameters
 from core.save import save_model
@@ -6,19 +8,35 @@ from core.save import save_model
 from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier, AdaBoostClassifier, ExtraTreesClassifier
 from sklearn.svm import SVC
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
-from sklearn.neighbors import KNeighborsClassifier
+from sklearn.neighbors import KNeighborsClassifier, RadiusNeighborsClassifier
 from sklearn.neural_network import MLPClassifier
 from sklearn.multiclass import OneVsRestClassifier, OneVsOneClassifier
 
 def algorithm_setup(model_type, nondef_params):
-    
+    # radious Nearest Neighbors (rNN)
+    if model_type=="rNN":
+        if nondef_params:
+            model=RadiusNeighborsClassifier(radius=parameters.radius
+                                       #, leaf_size=parameters.leaf_size
+                                       #, algorithm=parameters.algorithm_knn
+                                       , p=parameters.p
+                                       , weights=parameters.weights)
+        else:
+            model=RadiusNeighborsClassifier(radius=1.0
+                                   , weights='uniform'
+                                   , algorithm='auto'
+                                   , leaf_size=30
+                                   , p=2
+                                   , metric='minkowski'
+                                   , metric_params=None
+                                   )
     # Ada Boost (AB)
     if model_type=="AB":
         from sklearn.tree import DecisionTreeClassifier
         if nondef_params:
             model=AdaBoostClassifier(base_estimator=DecisionTreeClassifier(max_depth=1)
                                      , n_estimators=parameters.n_estimators
-                                     , algorithm=parameters.algorithm
+                                     , algorithm=parameters.algorithm_ab
                                      , random_state=settings.SEED)
         else:
             model=AdaBoostClassifier(base_estimator=DecisionTreeClassifier(max_depth=1)
@@ -90,7 +108,14 @@ def algorithm_setup(model_type, nondef_params):
     
     # k-Nearest Neighbors (kNN)
     if model_type=="kNN":
-        model=KNeighborsClassifier(n_neighbors=5
+        if nondef_params:
+            model=KNeighborsClassifier(n_neighbors=parameters.n_neighbors
+                                       #, leaf_size=parameters.leaf_size
+                                       #, algorithm=parameters.algorithm_knn
+                                       , p=parameters.p
+                                       , weights=parameters.weights)
+        else:
+            model=KNeighborsClassifier(n_neighbors=5
                                    , weights='uniform'
                                    , algorithm='auto'
                                    , leaf_size=30
@@ -121,13 +146,12 @@ def algorithm_setup(model_type, nondef_params):
             model=MLPClassifier(random_state=settings.SEED
                                 , hidden_layer_sizes=(100,)
                                 , activation='relu'
-                                , solver='adam'
+                                , solver='lbfgs'
                                 , alpha=0.0001
                                 , batch_size='auto'
                                 , learning_rate='constant'
                                 , learning_rate_init=0.001
                                 , power_t=0.5
-                                , max_iter=500
                                 , shuffle=True
                                 , tol=0.0001
                                 , warm_start=False
@@ -139,7 +163,7 @@ def algorithm_setup(model_type, nondef_params):
                                 , beta_2=0.999
                                 , epsilon=1e-08
                                 , n_iter_no_change=10
-                                )
+                                , max_iter=500)
     
     # Random Forest (RF)
     if model_type=="RF":

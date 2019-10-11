@@ -22,7 +22,7 @@ if __name__=="__main__":
     parser.add_argument("-f", "--fit", type=str, help="TRAINING SET file with descriptors and activity (; separated)", required=True)
     parser.add_argument("-p", "--predict", type=str, help="TEST SET file with descriptors and activity (; separated)")
     parser.add_argument("-a", "--activity", type=str, help="Y name", required=True)
-    parser.add_argument("-m", "--model", type=str, default="RF", help="available models: AB, ETC, GB, kNN, LDA, MLP, PLS, RF, SVM")
+    parser.add_argument("-m", "--model", type=str, default="RF", help="available models: AB, ETC, GB, kNN, rNN, LDA, MLP, PLS, RF, SVM")
     parser.add_argument("-v", "--verbose", type=int, default=0, help="increase verbosity")
     parser.add_argument("-s", "--seed", type=int, default=666, help="set random seed")
     subparsers = parser.add_subparsers()
