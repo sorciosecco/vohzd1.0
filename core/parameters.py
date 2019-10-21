@@ -65,7 +65,7 @@
 
 ### The number of trees in the forest. The larger the better, but also the longer it will take to compute. In addition, note that results will stop getting significantly better beyond a critical number of trees.
 
-n_estimators=100
+n_estimators=240
 
 ##### (RF, ETC, GB)
 
@@ -87,7 +87,7 @@ max_features='sqrt'
 
 ### The maximum depth of the tree. If None, then nodes are expanded until all leaves are pure or until all leaves contain less than min_samples_split samples. Ignored if max_leaf_nodes is not None.
 
-max_depth=None
+max_depth=9
 
 ### Grow trees with max_leaf_nodes in best-first fashion. Best nodes are defined as relative reduction in impurity. If None then unlimited number of leaf nodes. If not None then max_depth will be ignored.
 
@@ -101,8 +101,8 @@ max_leaf_nodes=None
 #   The "balanced_subsample" mode is the same as "balanced" except that weights are computed based on the bootstrap sample for every tree grown. For multi-output, the weights of each column of y will be multiplied. Note that these weights will be multiplied with sample_weight (passed through the fit method) if sample_weight is specified.
 
 #class_weight=None
-#class_weight='balanced'
-class_weight='balanced_subsample'
+class_weight='balanced'
+#class_weight='balanced_subsample'
 
 ##### (RF, ETC)
 
@@ -116,14 +116,14 @@ criterion_rf='gini'
 ### If SAMME.R then use the SAMME.R real boosting algorithm. base_estimator must support calculation of class probabilities. If SAMME then use the SAMME discrete boosting algorithm. The SAMME.R algorithm typically converges faster than SAMME, achieving a lower test error with fewer boosting iterations.
 
 algorithm_ab='SAMME.R'
-#algorithm='SAMME'
+#algorithm_ab='SAMME'
 
 ##### (GB)
 
 ### loss function to be optimized. "deviance" refers to deviance (= logistic regression) for classification with probabilistic outputs. For loss "exponential" gradient boosting recovers the AdaBoost algorithm.
 
-loss='deviance'
-#loss='exponential'
+#loss='deviance'
+loss='exponential'
 
 ### The function to measure the quality of a split. Supported criteria are:
 #   "friedman_mse" for the mean squared error with improvement score by Friedman
@@ -143,8 +143,8 @@ criterion_gb='friedman_mse'
 #   "eigen": Eigenvalue decomposition, can be combined with shrinkage.
 
 #solver='svd'
-solver='lsqr'
-#solver='eigen'
+#solver='lsqr'
+solver='eigen'
 
 ##### (LDA)
 
@@ -154,9 +154,9 @@ solver='lsqr'
 #   float between 0 and 1: fixed shrinkage parameter.
 ### Note that shrinkage works only with "lsqr" and "eigen" solvers.
 
-shrinkage=None
+#shrinkage=None
 #shrinkage='auto'
-#shrinkage=0.95
+shrinkage=0.09
 
 ##### (SVM)
 
@@ -166,20 +166,20 @@ C=1
 
 ### Degree of the polynomial kernel function "poly". Ignored by all other kernels.
 
-degree=3
+degree=2
 
 ### Kernel coefficient for "rbf", "poly" and "sigmoid".
 #   default is "auto" which uses 1 / n_features
 #   if gamma="scale" is passed then it uses 1 / (n_features * X.var()) as value of gamma.
 
-gamma='auto'
+#gamma='auto'
 #gamma='scale'
-#gamma=0.1
+gamma=0.011
 
 ### Specifies the kernel type to be used in the algorithm. It must be one of "linear", "poly", "rbf", "sigmoid", "precomputed" or a callable. If none is given, "rbf" will be used. If a callable is given it is used to pre-compute the kernel matrix from data matrices; that matrix should be an array of shape (n_samples, n_samples).
 
-kernel='linear'
-#kernel='rbf'
+#kernel='linear'
+kernel='rbf'
 #kernel='poly'
 #kernel='sigmoid'
 
@@ -187,7 +187,7 @@ kernel='linear'
 
 ### Number of neighbors to use by default for kneighbors queries.
 
-n_neighbors=5
+n_neighbors=4
 
 ### Radius to use by default for kneighbors queries.
 

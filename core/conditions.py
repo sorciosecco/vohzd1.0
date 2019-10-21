@@ -34,18 +34,16 @@ param_grids = {
     #     Whether to use out-of-bag samples to estimate the generalization error.
     #
     'RF': {
-        'n_estimators': np.arange(10,505,5).tolist(),
+        'n_estimators': np.arange(10,505,10).tolist(),
         'criterion_rf': ['gini', 'entropy'],
-        #'max_features': ['sqrt', 'log2', None] + np.arange(0.05,1.0,0.05).tolist(),
         'max_features': ['sqrt', 'log2', None],
         'max_depth': [None] + np.arange(3,11,1).tolist(),
         'max_leaf_nodes': [None] + np.arange(5,55,5).tolist(),
         'class_weight': [None, 'balanced', 'balanced_subsample'],
     },
      'ETC': {
-        'n_estimators': np.arange(10,505,5).tolist(),
+        'n_estimators': np.arange(10,505,10).tolist(),
         'criterion_rf': ['gini', 'entropy'],
-        #'max_features': ['sqrt', 'log2', None] + np.arange(0.05,1.0,0.05).tolist(),
         'max_features': ['sqrt', 'log2', None],
         'max_depth': [None] + np.arange(3,11,1).tolist(),
         'max_leaf_nodes': [None] + np.arange(5,55,5).tolist(),
@@ -53,7 +51,7 @@ param_grids = {
     },
     'AB': {
         'n_estimators': np.arange(10, 505, 5).tolist(),
-        'algorithm': ['SAMME.R', 'SAMME'],
+        'algorithm_ab': ['SAMME.R', 'SAMME'],
     },
     # GRADIENT BOOSTING (GB)
     #
@@ -71,13 +69,11 @@ param_grids = {
     #     If None it uses loss.init_estimator.
     #
     'GB': {
-        'n_estimators': np.arange(10,505,5).tolist(),
-        #'max_features': ['sqrt', 'log2', None] + np.arange(0.05,1.0,0.05).tolist(),
+        'n_estimators': np.arange(10,505,10).tolist(),
         'max_features': ['sqrt', 'log2', None],
         'max_depth': [None] + np.arange(3,11,1).tolist(),
         'max_leaf_nodes': [None] + np.arange(5,55,5).tolist(),
         'loss': ['deviance', 'exponential'],
-        'criterion_gb': ['friedman_mse', 'mse', 'mae'],
     },
     'LDA': {
         'shrinkage': np.arange(0.01,1.01,0.01).tolist() + [None, 'auto'],

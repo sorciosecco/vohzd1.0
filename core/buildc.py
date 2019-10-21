@@ -32,7 +32,7 @@ def build_classification_model(args):
     X1, X2, Y1, Y2, O1, O2, V = load_datasets(training=settings.FIT, test=settings.PREDICT, y_name=settings.ACTIVITY)
     
     if settings.GRIDSEARCH:
-        gridsearchcv(X=X1, Y=Y1, grid=param_grids[settings.MODEL])
+        gridsearchcv(X1=X1, Y1=Y1, X2=X2, Y2=Y2, grid=param_grids[settings.MODEL])
     else:
         make_one_model(X1=X1, X2=X2, Y1=Y1, Y2=Y2, O1=O1, O2=O2)
     

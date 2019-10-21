@@ -54,7 +54,8 @@ def algorithm_setup(model_type, nondef_params):
                                        , max_depth=parameters.max_depth
                                        , max_features=parameters.max_features
                                        , max_leaf_nodes=parameters.max_leaf_nodes
-                                       , random_state=settings.SEED)
+                                       , random_state=settings.SEED
+                                       , bootstrap=True)
         else:
             model=ExtraTreesClassifier(random_state=settings.SEED
                                        , n_estimators=100

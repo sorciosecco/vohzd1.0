@@ -3,7 +3,7 @@ import os, shutil, itertools, tempfile
 import numpy as np
 import multiprocessing as mp
 from sklearn.model_selection import KFold
-from sklearn.metrics import matthews_corrcoef, recall_score, confusion_matrix
+from sklearn.metrics import matthews_corrcoef, recall_score, confusion_matrix, balanced_accuracy_score
 
 from core import settings
 from core import parameters
@@ -38,18 +38,18 @@ def cross_validation(x, y, cv, model):
 
 def compute_model(model):
     
-    X, Y, m = model[0], model[1], model[-1]
+    X1, Y1, X2, Y2, m = model[0], model[1], model[2], model[3], model[-1]
     try:
-        m.fit(X, Y)
+        m.fit(X1, Y1)
     except:
         scores = [-99,-99,-99]
     else:
-        scores = cross_validation(x=X, y=Y, cv=5, model=m)
+        #scores = cross_validation(x=X, y=Y, cv=5, model=m)
+        scores = [round(balanced_accuracy_score(Y2, m.predict(X2).tolist()),2)]
     
     q.put(1)
     size=q.qsize()
     print('['+str(round(size*100/settings.N,3))+' %] of models completed')
-    #print(m.get_params())
     
     if settings.MULTICLASS:
         params = { k.split('__')[-1]: m.get_params()[k] for k in list(m.get_params().keys()) }
@@ -60,7 +60,7 @@ def compute_model(model):
     ocsv.write(';'.join([str(size)] + [str(params[k]) for k in sorted(list(params.keys())) if k in settings.NAMES] + [str(s) for s in scores]) + '\n')
     ocsv.close()
 
-def gridsearchcv(X, Y, grid):
+def gridsearchcv(X1, Y1, X2, Y2, grid):
     origdir=os.getcwd()
     workdir=tempfile.mkdtemp(prefix='TMP')
     os.chdir(workdir)
@@ -96,8 +96,8 @@ def gridsearchcv(X, Y, grid):
             #elif p=='leaf_size': parameters.leaf_size = combo[p]
             elif p=='p': parameters.p = combo[p]
             
-            #if p.startswith("criterion") or p.startswith("algorithm"):
-            if p.startswith("criterion"):
+            if p.startswith("criterion") or p.startswith("algorithm"):
+            #if p.startswith("criterion"):
                 settings.NAMES.append(p.split('_')[0])
             else:
                 settings.NAMES.append(p)
@@ -106,39 +106,37 @@ def gridsearchcv(X, Y, grid):
             if parameters.max_leaf_nodes != None:
                 if parameters.max_leaf_nodes != counter:
                     model = define_model_for_optimization(mt=settings.MODEL, ndp=True, mc=settings.MULTICLASS)
-                    models.append((X, Y, model))
+                    models.append((X1, Y1, X2, Y2, model))
                     couter = parameters.max_leaf_nodes
             else:
                 model = define_model_for_optimization(mt=settings.MODEL, ndp=True, mc=settings.MULTICLASS)
-                models.append((X, Y, model))
-        
+                models.append((X1, Y1, X2, Y2, model))
         elif settings.MODEL == "LDA":
             if parameters.solver == "svd":
                 if parameters.shrinkage == None:
                     model = define_model_for_optimization(mt=settings.MODEL, ndp=True, mc=settings.MULTICLASS)
-                    models.append((X, Y, model))
+                    models.append((X1, Y1, X2, Y2, model))
             else:
                 model = define_model_for_optimization(mt=settings.MODEL, ndp=True, mc=settings.MULTICLASS)
-                models.append((X, Y, model))
-        
+                models.append((X1, Y1, X2, Y2, model))
         elif settings.MODEL == "SVM":
             if parameters.kernel != "poly":
                 if parameters.degree == 3:
                     model = define_model_for_optimization(mt=settings.MODEL, ndp=True, mc=settings.MULTICLASS)
-                    models.append((X, Y, model))
+                    models.append((X1, Y1, X2, Y2, model))
             else:
                 model = define_model_for_optimization(mt=settings.MODEL, ndp=True, mc=settings.MULTICLASS)
-                models.append((X, Y, model))
+                models.append((X1, Y1, X2, Y2, model))
             if parameters.kernel == "linear":
                 if parameters.gamma == 'auto':
                     model = define_model_for_optimization(mt=settings.MODEL, ndp=True, mc=settings.MULTICLASS)
-                    models.append((X, Y, model))
+                    models.append((X1, Y1, X2, Y2, model))
             else:
                 model = define_model_for_optimization(mt=settings.MODEL, ndp=True, mc=settings.MULTICLASS)
-                models.append((X, Y, model))
+                models.append((X1, Y1, X2, Y2, model))
         else:
             model = define_model_for_optimization(mt=settings.MODEL, ndp=True, mc=settings.MULTICLASS)
-            models.append((X, Y, model))
+            models.append((X1, Y1, X2, Y2, model))
     
     pool=mp.Pool(mp.cpu_count())
     pool.map_async(compute_model, models)
@@ -147,7 +145,7 @@ def gridsearchcv(X, Y, grid):
     
     os.chdir(origdir)
     outfile=open("opt_results_%s.csv" % settings.MODEL, "w")
-    if settings.MULTICLASS: outfile.write(';'.join(['model_id'] + sorted(names) + ['EE (5-fold cv)\n']))
+    if settings.MULTICLASS: outfile.write(';'.join(['model_id'] + sorted(names) + ['BA\n']))
     else: outfile.write(';'.join(['model_id'] + sorted(names) + ['SE','SP','MCC\n']))
     for f in os.listdir(workdir):
         line=open(os.path.join(workdir,f)).readline()

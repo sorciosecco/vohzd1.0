@@ -5,9 +5,8 @@ import numpy as np
 from sklearn.metrics import confusion_matrix
 from sklearn.metrics import recall_score
 from sklearn.metrics import precision_score
-from sklearn.metrics import accuracy_score
-from sklearn.metrics import f1_score
-from sklearn.metrics import matthews_corrcoef
+from sklearn.metrics import accuracy_score, matthews_corrcoef
+from sklearn.metrics import f1_score, balanced_accuracy_score
 
 def calculate_pls_metrics(y_train_exp, y_train_pred, y_test_exp, y_test_pred, lco, hco):
     
@@ -76,7 +75,7 @@ def calculate_class_scores(Y1_exp, Y1_pred, Y1_prob, Y2_exp, Y2_pred, Y2_prob, O
         return Ye, Yp, Yu
     
     if mc:
-        scores=["Set\tEE\tEEw"]
+        scores=["Set\tBA\tF1"]
         if pc==None: t=0.0
         else: t=pc
         
@@ -85,14 +84,12 @@ def calculate_class_scores(Y1_exp, Y1_pred, Y1_prob, Y2_exp, Y2_pred, Y2_prob, O
             
             Ye, Yp, Yu = get_uncertain(Y, threshold=t)
             
-            EE = sum([1 for x in range(len(Ye)) if Yp[x]!=Ye[x]]) / len(Ye)
+            message="\nOVERALL SUCCESS\nF1 (%s)\tF1 (%s)\tF1 (%s)\tF1 (%s)\tBA\n%s\t%s\t%s\t%s\t%s\n\nCONFUSION MATRIX\nCLASS\tPRED_%s\tPRED_%s\tPRED_%s\tPRED_%s\tUNC\tCORR_PERC" % tuple(classes + [round(f1, 2) for f1 in f1_score(Ye, Yp, average=None)] + [round(balanced_accuracy_score(Ye, Yp), 2)] + classes)
+            for c, bddcs_exp in enumerate(classes):
+                NoC = sum([1 for y in range(len(Ye)) if Ye[y]==bddcs_exp and Ye[y]==Yp[y]])
+                C_perc = round(NoC*100/occurrences[c])
+                message += '\n' + '\t'.join([str(bddcs_exp)] + [str(len([1 for y in range(len(Ye)) if Ye[y]==bddcs_exp and Yp[y]==bddcs_pred])) for bddcs_pred in classes] + [str(len([1 for y in range(len(Yu)) if Yu[y]==bddcs_exp]))] + [str(C_perc)])
             if i==1:
-            #if i!=-1:
-                message="\nCorrect test predictions -> "+str(round(100-EE*100))+"%\n\nBDDCS\tPRED_1\tPRED_2\tPRED_3\tPRED_4\tUNC\tCORR_%"
-                for c, bddcs_exp in enumerate(classes):
-                    NoC = sum([1 for y in range(len(Ye)) if Ye[y]==bddcs_exp and Ye[y]==Yp[y]])
-                    C_perc = round(NoC*100/occurrences[c])
-                    message += '\n' + '\t'.join([str(bddcs_exp)] + [str(len([1 for y in range(len(Ye)) if Ye[y]==bddcs_exp and Yp[y]==bddcs_pred])) for bddcs_pred in classes] + [str(len([1 for y in range(len(Yu)) if Yu[y]==bddcs_exp]))] + [str(C_perc)])
                 print(message)
     else:
         scores=["Set\tTP\tFN\tTN\tFP\tUNC\tACC\tSE\tSP\tPREC+\tPREC-\tF1\tMCC\tCoverage"]
