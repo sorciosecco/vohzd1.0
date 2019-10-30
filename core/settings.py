@@ -8,6 +8,7 @@ os.environ["DIR_INSTALL"] = maindir
 
 # These will be set during the first call of main function
 ACTIVITY=None
+BACKFEEL=False
 BALANCE=False
 FIT=False
 HIGHTHRESHOLD=None
@@ -31,3 +32,4 @@ VERBOSE=0
 N=0
 NAMES=None
 workdir=''
+VAR_NAMES=None

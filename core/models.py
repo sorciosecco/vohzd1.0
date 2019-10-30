@@ -4,6 +4,7 @@
 from core import settings
 from core import parameters
 from core.save import save_model
+from core.descriptors import backward_feature_elimination
 
 from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier, AdaBoostClassifier, ExtraTreesClassifier
 from sklearn.svm import SVC
@@ -227,15 +228,17 @@ def define_model_for_optimization(mt, ndp, mc):
         model=OneVsRestClassifier(model, n_jobs=1)
     return model
 
-def modelling(X_train, X_test, Y_train, model_type, nondef_params, sm, mc):
-    if settings.VERBOSE:
-        print('\nModelling in progress...')
-    
+#def modelling(X_train, X_test, Y_train, model_type, nondef_params, sm, mc):
+def modelling(X_train, X_test, Y_train, Y_test, model_type, nondef_params, sm, mc):
     model=algorithm_setup(model_type, nondef_params)
-    
     if mc:
         model=OneVsRestClassifier(model, n_jobs=1)
         #model=OneVsOneClassifier(model, n_jobs=1)
+    
+    
+    if settings.BACKFEEL:
+        backward_feature_elimination(m=model, Xtr=X_train, Xte=X_test, Ytr=Y_train, Yte=Y_test)
+    
     
     model.fit(X_train, Y_train)
     

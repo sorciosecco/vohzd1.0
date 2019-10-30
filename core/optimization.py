@@ -3,7 +3,7 @@ import os, shutil, itertools, tempfile
 import numpy as np
 import multiprocessing as mp
 from sklearn.model_selection import KFold
-from sklearn.metrics import matthews_corrcoef, recall_score, confusion_matrix, balanced_accuracy_score
+from sklearn.metrics import matthews_corrcoef, recall_score, confusion_matrix, balanced_accuracy_score, f1_score
 
 from core import settings
 from core import parameters
@@ -45,7 +45,8 @@ def compute_model(model):
         scores = [-99,-99,-99]
     else:
         #scores = cross_validation(x=X, y=Y, cv=5, model=m)
-        scores = [round(balanced_accuracy_score(Y2, m.predict(X2).tolist()),2)]
+        Yp=m.predict(X2).tolist()
+        scores = [round(f1, 2) for f1 in f1_score(Y2, Yp, average=None)]+[round(balanced_accuracy_score(Y2, Yp), 2)]
     
     q.put(1)
     size=q.qsize()
@@ -145,7 +146,7 @@ def gridsearchcv(X1, Y1, X2, Y2, grid):
     
     os.chdir(origdir)
     outfile=open("opt_results_%s.csv" % settings.MODEL, "w")
-    if settings.MULTICLASS: outfile.write(';'.join(['model_id'] + sorted(names) + ['BA\n']))
+    if settings.MULTICLASS: outfile.write(';'.join(['model_id'] + sorted(names) + ['F11', 'F12', 'F13', 'F14', 'BA\n']))
     else: outfile.write(';'.join(['model_id'] + sorted(names) + ['SE','SP','MCC\n']))
     for f in os.listdir(workdir):
         line=open(os.path.join(workdir,f)).readline()

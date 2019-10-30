@@ -65,7 +65,7 @@
 
 ### The number of trees in the forest. The larger the better, but also the longer it will take to compute. In addition, note that results will stop getting significantly better beyond a critical number of trees.
 
-n_estimators=240
+n_estimators=130
 
 ##### (RF, ETC, GB)
 
@@ -91,7 +91,7 @@ max_depth=9
 
 ### Grow trees with max_leaf_nodes in best-first fashion. Best nodes are defined as relative reduction in impurity. If None then unlimited number of leaf nodes. If not None then max_depth will be ignored.
 
-max_leaf_nodes=None
+max_leaf_nodes=40
 
 ##### (RF, ETC, SVM)
 
@@ -100,8 +100,8 @@ max_leaf_nodes=None
 #   The "balanced" mode uses the values of y to automatically adjust weights inversely proportional to class frequencies in the input data as n_samples / (n_classes * np.bincount(y)).
 #   The "balanced_subsample" mode is the same as "balanced" except that weights are computed based on the bootstrap sample for every tree grown. For multi-output, the weights of each column of y will be multiplied. Note that these weights will be multiplied with sample_weight (passed through the fit method) if sample_weight is specified.
 
-#class_weight=None
-class_weight='balanced'
+class_weight=None
+#class_weight='balanced'
 #class_weight='balanced_subsample'
 
 ##### (RF, ETC)
